@@ -84,12 +84,13 @@ async function main() {
             await db.run(`
                 insert into post(nickname, title, content, createdDate, likeCount, viewCount) 
                 values (:nickname, :title, :content, :createdDate, :likeCount, :viewCount)`, values); 
-            
+            const { id } = await db.get('SELECT last_insert_rowid() as id')
             res.json({
                 success: true, 
                 code: 0, 
                 message: 'db 삽입 성공',
                 data: {
+                    id, 
                     nickname: values[':nickname'], 
                     title: values[':title'], 
                     content: values[':content'], 
