@@ -228,7 +228,6 @@ async function main() {
     app.post('/post/:id/like', async (req, res) => {
         try {
             const { likeCount: lastLikeCount } = await db.get(`select likeCount from post where id = ?`, req.params.id);
-            console.log(lastLikeCount);
             const { changes } = await db.run(`update post set likeCount = ? where id = ?`, lastLikeCount + 1, req.params.id);
             if (changes == 0) {
                 throw new Error("좋아요에 실패하였습니다");
