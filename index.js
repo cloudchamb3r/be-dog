@@ -50,6 +50,9 @@ async function main() {
                 select id, nickname, title, content, createdDate, likeCount, viewCount from post where id = ?
             `, req.params.id); 
 
+            if (!result) {
+                throw new Error("id 에 해당하는 post 를 찾지 못했습니다")
+            }
             res.json({
                 success: true, 
                 code: 0, 
@@ -104,7 +107,7 @@ async function main() {
             })
         }
     });
-    
+
     app.listen(port, () => console.log(`server is running on ${port}`))
 }
 
