@@ -109,6 +109,97 @@ async function main() {
         }
     });
 
+
+    app.patch('/post', async (req, res) => {
+        try {
+            const values = {
+                ':id': req.body.id, 
+                ':nickname': req.body.nickname, 
+                ':title': req.body.title, 
+                ':content': req.body.content, 
+                ':likeCount': req.body.likeCount, 
+                ':viewCount': req.body.viewCount, 
+            }
+    
+            const isString = (x) => (typeof x === 'string' || x instanceof String)
+            const isNumber = (x) => (typeof x === 'number' || x instanceof Number)
+    
+            const activated = [] 
+            if (isString(req.body.nickname)) {
+                activated.push('nickname = :nickname')
+            }        
+            if (isString(req.body.title)) {
+                activated.push('title = :title')
+            }
+            if (isString(req.body.content)) {
+                activated.push('content = :content')
+            }
+            if (isNumber(req.body.likeCount)) {
+                activated.push('likeCount = :likeCount')
+            }
+            if (isNumber(req.body.viewCount)) {
+                activated.push('viewCount = :viewCount')
+            }
+    
+            const {changes } = await db.run(`
+                update post 
+                set 
+                    ${ activated.join(', ')}
+                where id = :id
+            `, values); 
+            if (changes == 0) {
+                throw new Error('id 에 해당하는 요소를 찾지 못했습니다')
+            }
+            res.json({
+                success: true, 
+                code: 0, 
+                message: 'db 수정 성공',
+                data: {
+                    id: values[':id'], 
+                    nickname: values[':nickname'], 
+                    title: values[':title'], 
+                    content: values[':content'], 
+                    createdDate: values[':createdDate'], 
+                    likeCount: values[':likeCount'], 
+                    viewCount: values[':viewCount'],
+                },
+            })
+        } catch(e) {
+            res.json({
+                success: false, 
+                code: -1, 
+                message: e.message, 
+                data: null, 
+            })
+        }
+    }); 
+
+    app.delete('/post/:id', async (req, res) => {
+        try {
+            const { changes } = await db.run(`
+                delete from post 
+                where id = ?
+            `, req.params.id);
+            if (changes == 0) {
+                throw new Error('id 에 해당하는 요소를 찾지 못했습니다')
+            }
+            res.json({
+                success: true, 
+                code: 0, 
+                message: '삭제 성공', 
+                data: {
+                    id: req.params.id
+                }, 
+            })
+        } catch(e) {
+            res.json({
+                success: false, 
+                code: -1, 
+                message: e.message, 
+                data: null, 
+            })
+        }
+    }); 
     app.listen(port, () => console.log(`server is running on ${port}`))
 }
 
