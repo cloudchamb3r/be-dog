@@ -38,3 +38,10 @@
 
 ## DELETE /post/{id}
 id 에 해당하는 게시글을 삭제합니다 
+
+
+## POST /post/{id}/view
+게시글을 조회합니다
+
+## POST /post/{id}/like
+게시글을 좋아요 합니다

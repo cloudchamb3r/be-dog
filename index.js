@@ -1,13 +1,13 @@
-const express = require('express') 
+const express = require('express')
 const sqlite3 = require('sqlite3')
-const { open }= require('sqlite')
-const port = 3030; 
+const { open } = require('sqlite')
+const port = 3030;
 
 async function main() {
     const db = await open({
         filename: 'database.db',
         driver: sqlite3.Database,
-    }); 
+    });
 
     // sqlite does not have date type ;d
     await db.exec(`
@@ -21,25 +21,25 @@ async function main() {
             viewCount integer 
         )
     `);
-    
-    const app = express() 
-    app.use(express.json()) 
-    
+
+    const app = express()
+    app.use(express.json())
+
     app.get('/post', async (req, res) => {
         try {
             const result = await db.all('select id, nickname, title, content, createdDate, likeCount, viewCount from post')
             res.json({
-                success: true, 
-                code: 0, 
-                message: '성공하였습니다', 
+                success: true,
+                code: 0,
+                message: '성공하였습니다',
                 data: result
             })
         } catch (e) {
             res.json({
-                success: false, 
-                code: -1, 
-                message: e.message, 
-                data: null, 
+                success: false,
+                code: -1,
+                message: e.message,
+                data: null,
             })
         }
     });
@@ -48,23 +48,23 @@ async function main() {
         try {
             const result = await db.get(`
                 select id, nickname, title, content, createdDate, likeCount, viewCount from post where id = ?
-            `, req.params.id); 
+            `, req.params.id);
 
             if (!result) {
                 throw new Error("id 에 해당하는 post 를 찾지 못했습니다")
             }
             res.json({
-                success: true, 
-                code: 0, 
-                message: '성공하였습니다', 
-                data: result, 
+                success: true,
+                code: 0,
+                message: '성공하였습니다',
+                data: result,
             })
-        }catch(e) {
+        } catch (e) {
             res.json({
-                success: false, 
-                code: -1, 
-                message: e.message, 
-                data: null, 
+                success: false,
+                code: -1,
+                message: e.message,
+                data: null,
             })
         }
     })
@@ -73,38 +73,38 @@ async function main() {
         try {
             const now = (new Date()).toISOString();
             const values = {
-                ':nickname': req.body.nickname, 
-                ':title': req.body.title, 
-                ':content': req.body.content, 
+                ':nickname': req.body.nickname,
+                ':title': req.body.title,
+                ':content': req.body.content,
                 ':createdDate': now,
-                ':likeCount': 0, 
+                ':likeCount': 0,
                 ':viewCount': 0
             }
 
             await db.run(`
                 insert into post(nickname, title, content, createdDate, likeCount, viewCount) 
-                values (:nickname, :title, :content, :createdDate, :likeCount, :viewCount)`, values); 
+                values (:nickname, :title, :content, :createdDate, :likeCount, :viewCount)`, values);
             const { id } = await db.get('SELECT last_insert_rowid() as id')
             res.json({
-                success: true, 
-                code: 0, 
+                success: true,
+                code: 0,
                 message: 'db 삽입 성공',
                 data: {
-                    id, 
-                    nickname: values[':nickname'], 
-                    title: values[':title'], 
-                    content: values[':content'], 
-                    createdDate: values[':createdDate'], 
-                    likeCount: values[':likeCount'], 
+                    id,
+                    nickname: values[':nickname'],
+                    title: values[':title'],
+                    content: values[':content'],
+                    createdDate: values[':createdDate'],
+                    likeCount: values[':likeCount'],
                     viewCount: values[':viewCount'],
                 },
             })
         } catch (e) {
             res.json({
-                success: false, 
-                code: -1, 
-                message: e.message, 
-                data: null, 
+                success: false,
+                code: -1,
+                message: e.message,
+                data: null,
             })
         }
     });
@@ -113,21 +113,21 @@ async function main() {
     app.patch('/post', async (req, res) => {
         try {
             const values = {
-                ':id': req.body.id, 
-                ':nickname': req.body.nickname, 
-                ':title': req.body.title, 
-                ':content': req.body.content, 
-                ':likeCount': req.body.likeCount, 
-                ':viewCount': req.body.viewCount, 
+                ':id': req.body.id,
+                ':nickname': req.body.nickname,
+                ':title': req.body.title,
+                ':content': req.body.content,
+                ':likeCount': req.body.likeCount,
+                ':viewCount': req.body.viewCount,
             }
-    
+
             const isString = (x) => (typeof x === 'string' || x instanceof String)
             const isNumber = (x) => (typeof x === 'number' || x instanceof Number)
-    
-            const activated = [] 
+
+            const activated = []
             if (isString(req.body.nickname)) {
                 activated.push('nickname = :nickname')
-            }        
+            }
             if (isString(req.body.title)) {
                 activated.push('title = :title')
             }
@@ -140,39 +140,39 @@ async function main() {
             if (isNumber(req.body.viewCount)) {
                 activated.push('viewCount = :viewCount')
             }
-    
-            const {changes } = await db.run(`
+
+            const { changes } = await db.run(`
                 update post 
                 set 
-                    ${ activated.join(', ')}
+                    ${activated.join(', ')}
                 where id = :id
-            `, values); 
+            `, values);
             if (changes == 0) {
                 throw new Error('id 에 해당하는 요소를 찾지 못했습니다')
             }
             res.json({
-                success: true, 
-                code: 0, 
+                success: true,
+                code: 0,
                 message: 'db 수정 성공',
                 data: {
-                    id: values[':id'], 
-                    nickname: values[':nickname'], 
-                    title: values[':title'], 
-                    content: values[':content'], 
-                    createdDate: values[':createdDate'], 
-                    likeCount: values[':likeCount'], 
+                    id: values[':id'],
+                    nickname: values[':nickname'],
+                    title: values[':title'],
+                    content: values[':content'],
+                    createdDate: values[':createdDate'],
+                    likeCount: values[':likeCount'],
                     viewCount: values[':viewCount'],
                 },
             })
-        } catch(e) {
+        } catch (e) {
             res.json({
-                success: false, 
-                code: -1, 
-                message: e.message, 
-                data: null, 
+                success: false,
+                code: -1,
+                message: e.message,
+                data: null,
             })
         }
-    }); 
+    });
 
     app.delete('/post/:id', async (req, res) => {
         try {
@@ -184,22 +184,70 @@ async function main() {
                 throw new Error('id 에 해당하는 요소를 찾지 못했습니다')
             }
             res.json({
-                success: true, 
-                code: 0, 
-                message: '삭제 성공', 
+                success: true,
+                code: 0,
+                message: '삭제 성공',
                 data: {
                     id: req.params.id
-                }, 
+                },
             })
-        } catch(e) {
+        } catch (e) {
             res.json({
-                success: false, 
-                code: -1, 
-                message: e.message, 
-                data: null, 
+                success: false,
+                code: -1,
+                message: e.message,
+                data: null,
             })
         }
-    }); 
+    });
+
+    app.post('/post/:id/view', async (req, res) => {
+        try {
+            const { viewCount: lastViewCount } = await db.get(`select viewCount from post where id = ?`, req.params.id);
+            const { changes } = await db.run(`update post set viewCount = ? where id = ?`, lastViewCount + 1, req.params.id);
+            if (changes == 0) {
+                throw new Error("조회에 실패하였습니다")
+            }
+            res.json({
+                sucess: true,
+                code: 0,
+                message: '조회 성공',
+                data: null,
+            });
+
+        } catch (e) {
+            res.json({
+                success: false,
+                code: -1,
+                message: e.message,
+                data: null,
+            })
+        }
+    });
+
+    app.post('/post/:id/like', async (req, res) => {
+        try {
+            const { likeCount: lastLikeCount } = await db.get(`select likeCount from post where id = ?`, req.params.id);
+            console.log(lastLikeCount);
+            const { changes } = await db.run(`update post set likeCount = ? where id = ?`, lastLikeCount + 1, req.params.id);
+            if (changes == 0) {
+                throw new Error("좋아요에 실패하였습니다");
+            }
+            res.json({
+                success: true,
+                code: 0,
+                message: '좋아요 성공',
+                data: null,
+            })
+        } catch (e) {
+            res.json({
+                success: false,
+                code: -1,
+                message: e.message,
+                data: null,
+            })
+        }
+    });
     app.listen(port, () => console.log(`server is running on ${port}`))
 }
 
