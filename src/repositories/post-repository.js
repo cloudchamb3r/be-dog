@@ -7,7 +7,7 @@ export default {
         return db.all('select id, nickname, title, content, createdDate, likeCount, viewCount from post');
     },
     async getPostById(id) {
-        const result = db.get(`select id, nickname, title, content, createdDate, likeCount, viewCount from post where id = ?`, id);
+        const result = await db.get(`select id, nickname, title, content, createdDate, likeCount, viewCount from post where id = ?`, id);
         if (!result) {
             throw new Error("id 에 해당하는 post 를 찾지 못했습니다");
         }
