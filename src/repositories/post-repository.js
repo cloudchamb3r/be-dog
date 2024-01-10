@@ -19,7 +19,10 @@ export default {
             insert into post(nickname, title, content, createdDate, likeCount, viewCount) 
             values (:nickname, :title, :content, :createdDate, :likeCount, :viewCount)`, postDto.toSqliteParam());
             const { id } = await db.get('SELECT last_insert_rowid() as id');
-            return id;
+            return {
+                ...postDto,
+                id,
+            };
         });
     },
     async updatePost(postDto) {
