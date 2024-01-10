@@ -1,18 +1,18 @@
 import { isNumber, isString } from "./validator.js";
 
 export default {
-    success(data, { code, message }) {
+    success(data, config) {
         return {
             success: true,
-            code: isNumber(code) ? code : 0,
-            message: isString(message) ? message : '성공하였습니다',
+            code: config && 'code' in config && isNumber(config.code) ? config.code : 0,
+            message: config && 'message' in config && isString(config.message) ? config.message : '성공하였습니다',
             data: data,
         };
     },
-    fail(error, { code }) {
+    fail(error, config) {
         return {
             success: false,
-            code: isNumber(code) ? code : -1,
+            code: config && 'code' in config && isNumber(config.code) ? config.code : -1,
             message: error.message,
             data: null,
         };
