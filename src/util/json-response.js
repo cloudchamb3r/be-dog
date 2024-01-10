@@ -1,4 +1,4 @@
-import { isNumber, isString } from "./validator";
+import { isNumber, isString } from "./validator.js";
 
 export default {
     success(data, { code, message }) {

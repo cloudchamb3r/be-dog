@@ -3,6 +3,7 @@ import postRouter from './routes/post-router.js';
 import { db, db_init } from './database.js';
 
 const port = 3030;
+const app = express();
 
 async function main() {
     await db_init();
@@ -20,10 +21,10 @@ async function main() {
         )
     `);
 
-    const app = express();
     app.use(express.json());
     app.use('/post', postRouter);
     app.listen(port, () => console.log(`server is running on ${port}`));
 }
-
 main().then();
+
+export default app; 
