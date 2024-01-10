@@ -103,7 +103,7 @@ async function main() {
                 const { id } = await db.get('SELECT last_insert_rowid() as id')
                 return id;
             });
-            
+
             res.json({
                 success: true,
                 code: 0,
@@ -248,7 +248,6 @@ async function main() {
     });
 
     app.post('/post/:id/like', async (req, res) => {
-    
         try {            
             const changes = await tx(async ()=>{
                 const { likeCount: lastLikeCount } = await db.get(`select likeCount from post where id = ?`, req.params.id);
@@ -272,9 +271,7 @@ async function main() {
                 message: e.message,
                 data: null,
             })
-        } finally {
-
-        }
+        } 
     });
     app.listen(port, () => console.log(`server is running on ${port}`))
 }
