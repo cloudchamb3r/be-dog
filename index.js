@@ -1,7 +1,22 @@
 const express = require('express')
 const sqlite3 = require('sqlite3')
 const { open } = require('sqlite')
+const Mutex = require('async-mutex').Mutex
 const port = 3030;
+
+const __tx_mtx = new Mutex(); 
+async function tx(promise) {
+    let ret = undefined; 
+    await __tx_mtx.acquire(); 
+    try {
+        ret = await promise();
+    } catch(e) {
+        throw e; 
+    } finally {
+        __tx_mtx.release();
+    }
+    return ret;
+}
 
 async function main() {
     const db = await open({
@@ -81,10 +96,14 @@ async function main() {
                 ':viewCount': 0
             }
 
-            await db.run(`
-                insert into post(nickname, title, content, createdDate, likeCount, viewCount) 
-                values (:nickname, :title, :content, :createdDate, :likeCount, :viewCount)`, values);
-            const { id } = await db.get('SELECT last_insert_rowid() as id')
+            const id = await tx(async() => {
+                await db.run(`
+                    insert into post(nickname, title, content, createdDate, likeCount, viewCount) 
+                    values (:nickname, :title, :content, :createdDate, :likeCount, :viewCount)`, values);
+                const { id } = await db.get('SELECT last_insert_rowid() as id')
+                return id;
+            });
+            
             res.json({
                 success: true,
                 code: 0,
@@ -203,8 +222,11 @@ async function main() {
 
     app.post('/post/:id/view', async (req, res) => {
         try {
-            const { viewCount: lastViewCount } = await db.get(`select viewCount from post where id = ?`, req.params.id);
-            const { changes } = await db.run(`update post set viewCount = ? where id = ?`, lastViewCount + 1, req.params.id);
+            const changes = await tx(async() => {
+                const { viewCount: lastViewCount } = await db.get(`select viewCount from post where id = ?`, req.params.id);
+                const { changes } = await db.run(`update post set viewCount = ? where id = ?`, lastViewCount + 1, req.params.id);
+                return changes;
+            }); 
             if (changes == 0) {
                 throw new Error("조회에 실패하였습니다")
             }
@@ -226,9 +248,14 @@ async function main() {
     });
 
     app.post('/post/:id/like', async (req, res) => {
-        try {
-            const { likeCount: lastLikeCount } = await db.get(`select likeCount from post where id = ?`, req.params.id);
-            const { changes } = await db.run(`update post set likeCount = ? where id = ?`, lastLikeCount + 1, req.params.id);
+    
+        try {            
+            const changes = await tx(async ()=>{
+                const { likeCount: lastLikeCount } = await db.get(`select likeCount from post where id = ?`, req.params.id);
+                const { changes } = await db.run(`update post set likeCount = ? where id = ?`, lastLikeCount + 1, req.params.id);
+                return changes;
+            }); 
+
             if (changes == 0) {
                 throw new Error("좋아요에 실패하였습니다");
             }
@@ -245,6 +272,8 @@ async function main() {
                 message: e.message,
                 data: null,
             })
+        } finally {
+
         }
     });
     app.listen(port, () => console.log(`server is running on ${port}`))
