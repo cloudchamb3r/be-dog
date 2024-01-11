@@ -17,7 +17,8 @@ async function main() {
             content varchar(100), 
             createdDate varchar(100), 
             likeCount integer, 
-            viewCount integer 
+            viewCount integer,
+            img clob 
         )
     `);
 

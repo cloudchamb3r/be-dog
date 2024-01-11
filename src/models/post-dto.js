@@ -6,8 +6,9 @@ export class PostDto {
     createdDate;
     likeCount;
     viewCount;
+    img;
 
-    constructor({ id, nickname, title, content, createdDate, likeCount, viewCount }) {
+    constructor({ id, nickname, title, content, createdDate, likeCount, viewCount, img }) {
         this.id = id;
         this.nickname = nickname;
         this.title = title;
@@ -15,6 +16,7 @@ export class PostDto {
         this.createdDate = createdDate;
         this.likeCount = likeCount;
         this.viewCount = viewCount;
+        this.img = img;
     }
 
     toSqliteParam() {
@@ -26,6 +28,7 @@ export class PostDto {
             ':createdDate': this.createdDate,
             ':likeCount': this.likeCount,
             ':viewCount': this.viewCount,
+            ':img': this.img,
         };
     }
 }

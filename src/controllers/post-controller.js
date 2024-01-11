@@ -66,5 +66,5 @@ export default {
         } catch (e) {
             res.json(jsonResponse.fail(e));
         }
-    }
+    },
 };

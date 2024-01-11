@@ -4,10 +4,10 @@ import { isString, isNumber } from '../util/validator.js';
 
 export default {
     getAllPost() {
-        return db.all('select id, nickname, title, content, createdDate, likeCount, viewCount from post');
+        return db.all('select id, nickname, title, content, createdDate, likeCount, viewCount, img from post');
     },
     async getPostById(id) {
-        const result = await db.get(`select id, nickname, title, content, createdDate, likeCount, viewCount from post where id = ?`, id);
+        const result = await db.get(`select id, nickname, title, content, createdDate, likeCount, viewCount, img from post where id = ?`, id);
         if (!result) {
             throw new Error("id 에 해당하는 post 를 찾지 못했습니다");
         }
@@ -16,8 +16,9 @@ export default {
     insertPost(postDto) {
         return atomic(async () => {
             await db.run(`
-            insert into post(nickname, title, content, createdDate, likeCount, viewCount) 
-            values (:nickname, :title, :content, :createdDate, :likeCount, :viewCount)`, postDto.toSqliteParam());
+            insert into post(nickname, title, content, createdDate, likeCount, viewCount, img) 
+            values (:nickname, :title, :content, :createdDate, :likeCount, :viewCount, :img)`, postDto.toSqliteParam());
+
             const { id } = await db.get('SELECT last_insert_rowid() as id');
             return {
                 ...postDto,
@@ -42,7 +43,9 @@ export default {
         if (isNumber(postDto.viewCount)) {
             activated.push('viewCount = :viewCount');
         }
-
+        if (isString(postDto.img)) {
+            activated.push('img = :img');
+        }
         const { changes } = await db.run(`
                 update post 
                 set 
