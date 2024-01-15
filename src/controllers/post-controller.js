@@ -67,4 +67,28 @@ export default {
             res.json(jsonResponse.fail(e));
         }
     },
+    async searchPostsByTitle(req, res) {
+        try {
+            const data = await postRepository.searchPostsByNickName(req.query.query); 
+            res.json(jsonResponse.success(data));
+        } catch (e) {
+            res.json(jsonResponse.fail(e));
+        }
+    }, 
+    async searchPostsByNickName(req, res) {
+        try {
+            const data = await postRepository.searchPostsByTitle(req.query.query); 
+            res.json(jsonResponse.success(data)); 
+        } catch (e) {
+            res.json(jsonResponse.fail(e));
+        }
+    },
+    async searchPostsByContent(req, res) {
+        try {
+            const data = await postRepository.searchPostsByContent(req.query.query); 
+            res.json(jsonResponse.success(data)); 
+        } catch(e) {
+            res.json(jsonResponse.fail(e));
+        }
+    }
 };

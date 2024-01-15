@@ -83,5 +83,26 @@ export default {
             }
             return this.getPostById(id);
         });
+    },
+    searchPostsByNickName(query) {
+        return db.all(`
+            select id, nickname, title, content, createdDate, likeCount, viewCount, img 
+            from post
+            where nickname like ?    
+        `, `%${query}%`);
+    },
+    async searchPostsByTitle(query) {
+        return db.all(`
+            select id, nickname, title, content, createdDate, likeCount, viewCount, img 
+            from post
+            where title like ?    
+        `, `%${query}%`);
+    },
+    async searchPostsByContent(query) {
+        return db.all(`
+            select id, nickname, title, content, createdDate, likeCount, viewCount, img 
+            from post
+            where content like ?    
+        `, `%${query}%`);
     }
 };

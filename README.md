@@ -45,3 +45,25 @@ id 에 해당하는 게시글을 삭제합니다
 
 ## POST /post/{id}/like
 게시글을 좋아요 합니다
+
+## GET /post/search/title
+
+### Query Parameter
+|파라미터|타입|필수|설명|
+|--|--|--|--|
+|query| string| O | title 에서 query를 포함하고 있는 모든 항목을 찾습니다| 
+
+## GET /post/search/content
+
+### Query Parameter
+|파라미터|타입|필수|설명|
+|--|--|--|--|
+|query| string| O | content 에서 query를 포함하고 있는 모든 항목을 찾습니다| 
+
+## GET /post/search/nickname
+
+### Query Parameter
+|파라미터|타입|필수|설명|
+|--|--|--|--|
+|query| string| O | nickname 에서 query를 포함하고 있는 모든 항목을 찾습니다| 
+
